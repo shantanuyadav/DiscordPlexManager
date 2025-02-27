@@ -41,41 +41,62 @@ class Remove(commands.Cog):
                     except Exception as server_error:
                         logger.error(f"Error removing user from server {server['server_name']}: {str(server_error)}", exc_info=True)
                         removal_results.append((server['server_name'], False))
-                # Format results message
+                # Format results message with enhanced error handling
                 embed = discord.Embed(
                     title="🔄 Plex Server Removal Status",
                     color=discord.Color.orange()
                 )
                 
-                # Add user info
+                # Add user info with more details
                 embed.add_field(
-                    name="👤 User",
-                    value=plex_username,
+                    name="👤 User Information",
+                    value=f"**Username:** {plex_username}",
                     inline=False
                 )
                 
-                # Add removal status for each server
+                # Add removal status for each server with detailed information
+                success_servers = []
+                failed_servers = []
+                
                 for server_name, success in removal_results:
-                    status = "✅" if success else "❌"
+                    if success:
+                        success_servers.append(server_name)
+                        embed.add_field(
+                            name=f"✅ {server_name}",
+                            value="Successfully removed user from server",
+                            inline=True
+                        )
+                    else:
+                        failed_servers.append(server_name)
+                        embed.add_field(
+                            name=f"❌ {server_name}",
+                            value="Failed to remove user - Please check server logs",
+                            inline=True
+                        )
+                
+                # Add summary section
+                summary = []
+                if success_servers:
+                    summary.append(f"✅ Successfully removed from {len(success_servers)} server(s)")
+                if failed_servers:
+                    summary.append(f"❌ Failed to remove from {len(failed_servers)} server(s)")
+                
+                if summary:
                     embed.add_field(
-                        name=f"{status} {server_name}",
-                        value="Successfully removed" if success else "Failed to remove",
-                        inline=True
+                        name="📊 Summary",
+                        value="\n".join(summary),
+                        inline=False
                     )
                 
-                embed.set_footer(text="User access has been revoked from the specified servers")
+                # Add detailed footer with next steps
+                if failed_servers:
+                    footer_text = "Some removals failed. Please check server logs or try again later."
+                else:
+                    footer_text = "User access has been successfully revoked from all specified servers."
+                
+                embed.set_footer(text=footer_text)
                 
                 await response_method(embed=embed)
-                success_servers = [name for name, result in removal_results if result]
-                failed_servers = [name for name, result in removal_results if not result]
-
-                message = []
-                if success_servers:
-                    message.append(f"Successfully removed {plex_username} from: {', '.join(success_servers)}")
-                if failed_servers:
-                    message.append(f"Failed to remove {plex_username} from: {', '.join(failed_servers)}")
-
-                await response_method('\n'.join(message) or f"No action taken for user {plex_username}")
 
             except Exception as db_error:
                 logger.error(f"Database error: {str(db_error)}", exc_info=True)

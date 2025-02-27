@@ -84,6 +84,7 @@ class DueSubscription(commands.Cog):
                 if 0 <= days_remaining <= 30:
                     due_subscriptions.append({
                         'username': sub['plex_username'],
+                        'email': sub.get('email', 'Not provided'),
                         'server': sub['server_name'],
                         'days_remaining': days_remaining,
                         'end_date': end_date.strftime('%d-%m-%Y')
@@ -117,7 +118,10 @@ class DueSubscription(commands.Cog):
         # Create the first embed
         embed = discord.Embed(
             title="📊 Subscription Status Overview",
-            description="Here are the subscriptions that require attention in the next 30 days.",
+            description=f"Here are the subscriptions that require attention in the next 30 days.\n\n"  \
+                            f"🔴 **Critical** ({len(critical)}): 0-2 days remaining\n"  \
+                            f"🟡 **Warning** ({len(warning)}): 3-7 days remaining\n"  \
+                            f"🟢 **Notice** ({len(notice)}): 8-30 days remaining",
             color=discord.Color.blue()
         )
         
@@ -132,10 +136,14 @@ class DueSubscription(commands.Cog):
         
         # Process critical subscriptions
         if critical:
-            critical_text = "\n".join([f"🔴 **{sub['username']}**\n└ Server: {sub['server']}\n└ Expires: {sub['end_date']} ({sub['days_remaining']} days)" 
+            critical_text = "\n\n".join([f"🔴 **{sub['username']}**\n"  \
+                                    f"└ 📧 Email: {sub['email']}\n"  \
+                                    f"└ 🖥️ Server: {sub['server']}\n"  \
+                                    f"└ ⏰ Expires: {sub['end_date']} ({sub['days_remaining']} days)\n"  \
+                                    f"└ 🔔 Status: Immediate Action Required" 
                                 for sub in critical])
             
-            critical_chunks = chunk_embed_field("⚠️ CRITICAL - Action Required (0-2 days)", critical_text, False)
+            critical_chunks = chunk_embed_field("⚠️ CRITICAL - Immediate Action Required (0-2 days)", critical_text, False)
             
             # Add fields to current embed or create new embeds as needed
             for name, value, inline in critical_chunks:
@@ -158,10 +166,14 @@ class DueSubscription(commands.Cog):
         
         # Process warning subscriptions
         if warning:
-            warning_text = "\n".join([f"🟡 **{sub['username']}**\n└ Server: {sub['server']}\n└ Expires: {sub['end_date']} ({sub['days_remaining']} days)" 
+            warning_text = "\n\n".join([f"🟡 **{sub['username']}**\n"  \
+                                    f"└ 📧 Email: {sub['email']}\n"  \
+                                    f"└ 🖥️ Server: {sub['server']}\n"  \
+                                    f"└ ⏰ Expires: {sub['end_date']} ({sub['days_remaining']} days)\n"  \
+                                    f"└ 🔔 Status: Renewal Required Soon" 
                                 for sub in warning])
             
-            warning_chunks = chunk_embed_field("⚠️ WARNING - Expiring Soon (3-7 days)", warning_text, False)
+            warning_chunks = chunk_embed_field("⚠️ WARNING - Renewal Required Soon (3-7 days)", warning_text, False)
             
             for name, value, inline in warning_chunks:
                 # Calculate size this field would add
@@ -183,10 +195,14 @@ class DueSubscription(commands.Cog):
         
         # Process notice subscriptions
         if notice:
-            notice_text = "\n".join([f"🟢 **{sub['username']}**\n└ Server: {sub['server']}\n└ Expires: {sub['end_date']} ({sub['days_remaining']} days)" 
+            notice_text = "\n\n".join([f"🟢 **{sub['username']}**\n"  \
+                                    f"└ 📧 Email: {sub['email']}\n"  \
+                                    f"└ 🖥️ Server: {sub['server']}\n"  \
+                                    f"└ ⏰ Expires: {sub['end_date']} ({sub['days_remaining']} days)\n"  \
+                                    f"└ 🔔 Status: Plan for Renewal" 
                                 for sub in notice])
             
-            notice_chunks = chunk_embed_field("ℹ️ NOTICE - Upcoming Renewals (8-30 days)", notice_text, False)
+            notice_chunks = chunk_embed_field("ℹ️ NOTICE - Plan for Renewal (8-30 days)", notice_text, False)
             
             for name, value, inline in notice_chunks:
                 # Calculate size this field would add

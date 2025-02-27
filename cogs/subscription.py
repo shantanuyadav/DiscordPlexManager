@@ -103,7 +103,7 @@ class Subscription(commands.Cog):
                 # Add user info
                 embed.add_field(
                     name="👤 Plex User",
-                    value=details['plex_username'],
+                    value=f"Username: {details['plex_username']}\nEmail: {details.get('email', 'Not provided')}",
                     inline=False
                 )
 

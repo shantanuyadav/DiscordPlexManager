@@ -122,8 +122,8 @@ class Invite(commands.Cog):
                     start_date: str):
         try:
             # Validate input parameters
-            if not plex_username or not '@' in plex_username:
-                raise ValueError("Please provide a valid Plex username/email")
+            if not plex_username or len(plex_username.strip()) == 0:
+                raise ValueError("Please provide a valid Plex username or email")
 
             if not payment_id or len(payment_id.strip()) == 0:
                 raise ValueError("Payment ID cannot be empty")

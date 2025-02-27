@@ -104,11 +104,11 @@ Invite a new user to your Plex server and track their subscription.
 - `duration`: Subscription duration (1_month, 3_months, 6_months, 12_months)
 - `payment method`: Method of payment (e.g., PayPal, Venmo, Cash)
 - `payment id`: Transaction ID or reference
-- `start date`: Start date of subscription (YYYY-MM-DD)
+- `start date`: Start date of subscription (DD-MM-YYYY)
 
 **Example:**
 ```
-/invite johndoe@example.com MyPlexServer 3_months PayPal TX123456 2023-01-15
+/invite john@example.com MyPlexServer 3_months PayPal TX123456 15-01-2023
 ```
 
 #### `/remove`
@@ -120,7 +120,7 @@ Remove a user from your Plex server and delete their subscription.
 
 **Example:**
 ```
-/remove johndoe@example.com
+/remove johnd@example.com
 ```
 
 #### `/renew`
@@ -132,7 +132,7 @@ Renew an existing user's subscription.
 
 **Example:**
 ```
-/renew johndoe@example.com 6_months
+/renew john@example.com 6_months
 ```
 
 ### Subscription Information
@@ -146,7 +146,7 @@ View details about a specific user's subscription.
 
 **Example:**
 ```
-/fetch_subscription johndoe@example.com
+/fetch_subscription john@example.com
 ```
 
 #### `/due_subscription`
@@ -172,7 +172,7 @@ Import existing Plex users into the subscription system.
 
 **Example:**
 ```
-/import_users MyPlexServer 1_month 2023-01-01
+/import_users MyPlexServer 1_month 01-01-2023
 ```
 
 ## Troubleshooting

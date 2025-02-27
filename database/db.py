@@ -44,8 +44,18 @@ class Database:
     async def add_subscription(self, subscription_data):
         """Add a new subscription"""
         try:
+            # Convert date from DD-MM-YYYY to YYYY-MM-DD format for database storage
+            start_date_str = subscription_data['start_date']
+            try:
+                # Try to parse as DD-MM-YYYY first
+                start_date = datetime.strptime(start_date_str, '%d-%m-%Y')
+                # Convert to YYYY-MM-DD for database storage
+                subscription_data['start_date'] = start_date.strftime('%Y-%m-%d')
+            except ValueError:
+                # If that fails, assume it's already in YYYY-MM-DD format
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            
             # Calculate end date based on start date and duration
-            start_date = datetime.strptime(subscription_data['start_date'], '%Y-%m-%d')
             end_date = calculate_end_date(start_date, subscription_data['duration'])
             subscription_data['end_date'] = end_date.strftime('%Y-%m-%d')
 

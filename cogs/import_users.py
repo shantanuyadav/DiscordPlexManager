@@ -49,9 +49,26 @@ class ImportUsers(commands.Cog):
                                 no_access_skipped += 1
                                 continue
 
-                            existing_sub = await db.get_subscription(user['email'])
+                            # Check if user exists by email and server name
+                            existing_sub_by_email = await db.get_subscription(user['email'])
+                            existing_sub_by_username = await db.get_subscription(user['username'])
                             
-                            if not existing_sub:
+                            # Check if user exists in this specific server
+                            exists_in_server = False
+                            if existing_sub_by_email:
+                                for sub in existing_sub_by_email:
+                                    if sub['server_name'] == server['server_name']:
+                                        exists_in_server = True
+                                        break
+                            
+                            if not exists_in_server and existing_sub_by_username:
+                                for sub in existing_sub_by_username:
+                                    if sub['server_name'] == server['server_name']:
+                                        exists_in_server = True
+                                        break
+                            
+                            # If user doesn't exist in this specific server
+                            if not exists_in_server:
                                 subscription_data = {
                                     'plex_username': user['username'],
                                     'email': user['email'],
@@ -62,8 +79,10 @@ class ImportUsers(commands.Cog):
                                 
                                 await db.add_subscription(subscription_data)
                                 total_imported += 1
+                                logger.info(f"Imported user: {user['username']} ({user['email']}) to server: {server['server_name']}")
                             else:
                                 total_skipped += 1
+                                logger.info(f"Skipped existing user: {user['username']} ({user['email']}) on server: {server['server_name']}")
                                 
                         except Exception as user_error:
                             errors.append(f"Error processing user {user['username']}: {str(user_error)}")

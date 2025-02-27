@@ -70,7 +70,14 @@ class DueSubscription(commands.Cog):
 
             # Check each subscription
             for sub in subscriptions:
-                start_date = datetime.strptime(sub['start_date'], '%Y-%m-%d')
+                # Try both date formats - first try DD-MM-YYYY, then YYYY-MM-DD
+                try:
+                    # Try DD-MM-YYYY format first
+                    start_date = datetime.strptime(sub['start_date'], '%d-%m-%Y')
+                except ValueError:
+                    # If that fails, try YYYY-MM-DD format
+                    start_date = datetime.strptime(sub['start_date'], '%Y-%m-%d')
+                    
                 end_date = calculate_end_date(start_date, sub['duration'])
                 days_remaining = (end_date - current_date).days
 
@@ -79,7 +86,7 @@ class DueSubscription(commands.Cog):
                         'username': sub['plex_username'],
                         'server': sub['server_name'],
                         'days_remaining': days_remaining,
-                        'end_date': end_date.strftime('%Y-%m-%d')
+                        'end_date': end_date.strftime('%d-%m-%Y')
                     })
 
             if not due_subscriptions:

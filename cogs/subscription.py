@@ -52,8 +52,14 @@ class Subscription(commands.Cog):
                     )
                     
                     for i, details in enumerate(subscriptions, 1):
-                        # Calculate end date
-                        start_date = datetime.strptime(details['start_date'], '%Y-%m-%d')
+                        # Calculate end date - try both date formats
+                        try:
+                            # Try DD-MM-YYYY format first
+                            start_date = datetime.strptime(details['start_date'], '%d-%m-%Y')
+                        except ValueError:
+                            # If that fails, try YYYY-MM-DD format
+                            start_date = datetime.strptime(details['start_date'], '%Y-%m-%d')
+                            
                         end_date = calculate_end_date(start_date, details['duration'])
                         days_remaining = (end_date - datetime.now()).days
                         
@@ -76,8 +82,14 @@ class Subscription(commands.Cog):
                 # Format subscription details for a single subscription
                 details = subscriptions[0]
                 
-                # Calculate end date
-                start_date = datetime.strptime(details['start_date'], '%Y-%m-%d')
+                # Calculate end date - try both date formats
+                try:
+                    # Try DD-MM-YYYY format first
+                    start_date = datetime.strptime(details['start_date'], '%d-%m-%Y')
+                except ValueError:
+                    # If that fails, try YYYY-MM-DD format
+                    start_date = datetime.strptime(details['start_date'], '%Y-%m-%d')
+                    
                 end_date = calculate_end_date(start_date, details['duration'])
                 days_remaining = (end_date - datetime.now()).days
                 
@@ -125,7 +137,7 @@ class Subscription(commands.Cog):
                 )
                 embed.add_field(
                     name="📅 End Date",
-                    value=end_date.strftime('%Y-%m-%d'),
+                    value=end_date.strftime('%d-%m-%Y'),
                     inline=True
                 )
                 
@@ -185,11 +197,17 @@ class Subscription(commands.Cog):
             payment_id = details.get('payment_id')  # Preserve payment ID
             
             # Calculate the current subscription's end date to use as new start date
-            current_start_date = datetime.strptime(details['start_date'], '%Y-%m-%d')
+            try:
+                # Try DD-MM-YYYY format first
+                current_start_date = datetime.strptime(details['start_date'], '%d-%m-%Y')
+            except ValueError:
+                # If that fails, try YYYY-MM-DD format
+                current_start_date = datetime.strptime(details['start_date'], '%Y-%m-%d')
+                
             current_end_date = calculate_end_date(current_start_date, details['duration'])
             
             # Use the current end date as the new start date
-            start_date = current_end_date.strftime('%Y-%m-%d')
+            start_date = current_end_date.strftime('%d-%m-%Y')
             
             # Remove old subscription
             await db.remove_subscription(plex_username)
@@ -212,7 +230,7 @@ class Subscription(commands.Cog):
             await db.add_subscription(subscription_data)
             
             # Calculate end date for display
-            end_date = calculate_end_date(datetime.strptime(start_date, '%Y-%m-%d'), duration.value)
+            end_date = calculate_end_date(datetime.strptime(start_date, '%d-%m-%Y'), duration.value)
             
             # Create embed for response
             embed = discord.Embed(
@@ -253,7 +271,7 @@ class Subscription(commands.Cog):
             
             embed.add_field(
                 name="📅 End Date",
-                value=end_date.strftime('%Y-%m-%d'),
+                value=end_date.strftime('%d-%m-%Y'),
                 inline=True
             )
             

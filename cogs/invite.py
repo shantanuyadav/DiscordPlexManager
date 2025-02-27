@@ -33,6 +33,26 @@ class Invite(commands.Cog):
         self.last_refresh_time = datetime.min
         # Cache refresh interval in seconds (5 minutes)
         self.refresh_interval = 300
+        
+    def _format_plex_error(self, error_str):
+        """Format Plex error messages to be more user-friendly"""
+        # Remove technical details and API endpoints
+        if 'http' in error_str and '/api/' in error_str:
+            # Extract just the error message without the URL
+            parts = error_str.split(':', 1)
+            if len(parts) > 1:
+                error_str = parts[1].strip()
+        
+        # Handle common error messages
+        if "already sharing" in error_str.lower():
+            return "User is already invited to this Plex server"
+        elif "not found" in error_str.lower():
+            return "User not found on Plex. Please verify the email/username"
+        elif "unauthorized" in error_str.lower():
+            return "Authentication failed. Please check your Plex credentials"
+        
+        # Return cleaned error or original if no specific handling
+        return error_str
 
     async def refresh_server_choices(self):
         # Only refresh if it's been more than refresh_interval since last refresh
@@ -63,7 +83,7 @@ class Invite(commands.Cog):
 
     async def start_date_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
         try:
-            today = datetime.now().strftime('%Y-%m-%d')
+            today = datetime.now().strftime('%d-%m-%Y')
             choices = [app_commands.Choice(name="Today", value=today)]
             
             # If user is typing a custom date, add it as an option
@@ -110,9 +130,9 @@ class Invite(commands.Cog):
 
             # Validate date format
             try:
-                datetime.strptime(start_date, '%Y-%m-%d')
+                datetime.strptime(start_date, '%d-%m-%Y')
             except ValueError:
-                raise ValueError("Invalid date format. Please use YYYY-MM-DD format")
+                raise ValueError("Invalid date format. Please use DD-MM-YYYY format")
 
             # Try to defer the response, but handle potential network issues
             try:

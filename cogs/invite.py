@@ -218,19 +218,21 @@ class Invite(commands.Cog):
 
             # Add subscription with error handling
             try:
+                # Get complete user details from Plex API
+                from plex.plex_manager import get_user_details
+                username, email = get_user_details(server['plex_token'], plex_username)
+                
                 subscription_data = {
-                    'plex_username': plex_username,
+                    'plex_username': username if username else plex_username,  # Use API username if available
                     'discord_username': str(discord_user),
                     'server_name': server_name,
                     'duration': duration.value,
                     'payment_method': payment_method.value,
                     'payment_id': payment_id,
-                    'start_date': start_date
+                    'start_date': start_date,
+                    'email': email if email else None  # Add email from API if available
                 }
                 
-                # Add email if we got it from the Plex API
-                if 'plex_email' in locals() and plex_email:
-                    subscription_data['email'] = plex_email
                 await db.add_subscription(subscription_data)
             except Exception as db_error:
                 logger.error(f"Database error while adding subscription: {str(db_error)}")
